@@ -24,6 +24,9 @@ is held by Douglas J. Morgan.
 #include "player.h"
 #include "sched.h"
 #include "viewer.h"
+#ifdef __amigaos__
+#include <cmath> // std::round; other libraries bring it in by the way
+#endif
 
 extern OS_Link oslink;
 extern Dungeon dungeon;

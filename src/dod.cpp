@@ -64,6 +64,9 @@ int main(int argc, char * argv[])
 	//exit(0);
 
 
+#ifdef __amigaos__
+    DOD_AmigaInit(); // PROGDIR: is the current directory
+#endif
     oslink.init();
 	return 0;
 }
