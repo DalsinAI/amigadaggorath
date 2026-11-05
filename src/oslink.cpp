@@ -505,6 +505,13 @@ void OS_Link::init() {
 
   std::cout << "DOD build info: " << buildInfo << std::endl;
 
+#ifdef __amigaos__
+  // The CoCo's 256x192 twice over (or once): an 8-bit screen of that size,
+  // and sound mixed at the rate of the game's own WAVs
+  width = (width >= 512) ? 512 : 256;
+  audio_rate = 22050;
+#endif
+
   if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_AUDIO) < 0) {
     fprintf(stderr, "Video initialization failed: %s\n", SDL_GetError());
     quitSDL(1);
@@ -656,6 +663,9 @@ void OS_Link::init() {
 #else
   while (1) {
     main_game_loop(this);
+#ifdef __amigaos__
+    SDL_Delay(4); // let the rest of the system run between the game's ticks
+#endif
   }
 #endif
   //    std::cout << "End of init" << std::endl;
@@ -726,14 +736,18 @@ void OS_Link::stop_demo() {
   ev.type = SDL_KEYDOWN;
   ev.key.keysym.sym = SDLK_SPACE;
   ev.key.state = SDL_PRESSED;
+#ifndef __amigaos__ // SDL 1.2 has no repeat field
   ev.key.repeat = 0;
+#endif
   SDL_PushEvent(&ev);
 
   SDL_Event evUp;
   evUp.type = SDL_KEYUP;
   evUp.key.keysym.sym = SDLK_SPACE;
   evUp.key.state = SDL_RELEASED;
+#ifndef __amigaos__ // SDL 1.2 has no repeat field
   evUp.key.repeat = 0;
+#endif
   SDL_PushEvent(&evUp);
 }
 
@@ -742,7 +756,9 @@ void OS_Link::trigger_menu() {
   ev.type = SDL_KEYDOWN;
   ev.key.keysym.sym = SDLK_ESCAPE;
   ev.key.state = SDL_PRESSED;
+#ifndef __amigaos__ // SDL 1.2 has no repeat field
   ev.key.repeat = 0;
+#endif
   SDL_PushEvent(&ev);
 
   SDL_Event evUp = {};
@@ -757,7 +773,9 @@ void OS_Link::send_key(int keycode) {
   ev.type = SDL_KEYDOWN;
   ev.key.keysym.sym = static_cast<SDL_Keycode>(keycode);
   ev.key.state = SDL_PRESSED;
+#ifndef __amigaos__ // SDL 1.2 has no repeat field
   ev.key.repeat = 0;
+#endif
   SDL_PushEvent(&ev);
 
   SDL_Event evUp = {};
@@ -1535,6 +1553,12 @@ void OS_Link::menu_string(char *newString, char *title, int maxLength) {
           break;
 
         default:
+#ifdef __amigaos__
+          // keys[] has 256 entries; SDL 1.2's cursor and function keys are past them
+          if (event.key.keysym.sym >= keyLen) {
+            break;
+          }
+#endif
           if (strlen(newString) < maxLength) {
             *(newString + strlen(newString) + 1) = '\0';
             *(newString + strlen(newString)) = keys[event.key.keysym.sym];

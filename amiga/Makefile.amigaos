@@ -1,0 +1,92 @@
+# Dungeons of Daggorath (PC port) for AmigaOS 3.x / AmiCradle, 68040 + FPU,
+# on acsdl12.
+#
+#   make -f amiga/Makefile.amigaos STOVE=/path/to/openamigagcc \
+#        NDK=/path/to/gfopensdk/OpenNDK/Include_H \
+#        ACSDL=/path/to/amicradle-guest/gameports/acsdl12
+#
+# STOVE is GFOpenAmigaGCC 16.2.0-open4 or later. ACSDL is acsdl12, built with
+# its own Makefile.amigaos (its library holds ACGame and zlib's inflate, so
+# ZLIB is only needed to build acsdl12). The game is upstream's C++; its
+# <SDL2/...> headers are amiga/include/SDL2, which map SDL 2 onto acsdl12
+# (amiga/dod_amiga.h), and its OpenGL is drawn in software by amiga/swgl.c.
+# src/shader.cpp (the NTSC artifact shader) is replaced by
+# amiga/shader_amiga.cpp. libstdc++ asks for POSIX threads:
+# amiga/pthread_stubs.c.
+# Output: build/amigaos/Daggorath/ with the program, conf, sound and saved
+# beside it, and the icons.
+
+STOVE   ?= $(HOME)/CradleLab/toolchain/openamigagcc-16.2.0-open4-x86_64-linux
+NDK     ?= $(HOME)/CradleLab/gfopensdk/OpenNDK/Include_H
+ACSDL   ?= $(HOME)/CradleLab/guest-sdl/gameports/acsdl12
+ACGAME  ?= $(ACSDL)/../acgame
+ZLIB    ?= $(HOME)/CradleLab/zlib-1.3.1
+CXX     = $(STOVE)/bin/m68k-amigaos-g++
+CC      = $(STOVE)/bin/m68k-amigaos-gcc
+CPU     ?= -m68040 -m68881
+OPT     ?= -O2 -fomit-frame-pointer
+VERSION ?= 0.5.0-amiga
+STAMP   ?= $(shell date -u +"%y-%m-%dT%H-%MZ")
+INCS    = -Iamiga/include -I$(ACSDL)/include/SDL -I$(ACSDL)/include \
+          -I$(ACGAME)/include -I$(NDK)
+# Upstream's own warnings, not the port's, are left out: members listed out
+# of order in its constructors (-Wreorder); locals set in every case of a
+# switch over fixed values (-Wmaybe-uninitialized); strcpy of savedDir,
+# which is always "saved", into gamefile (-Wrestrict); the Emscripten
+# error hook it never calls (-Wunused-function); and its loose counters.
+CXXFLAGS = -noixemul -std=gnu++11 $(OPT) $(CPU) -Wall -Wno-sign-compare \
+          -Wno-unused-variable -Wno-unused-but-set-variable -Wno-reorder \
+          -Wno-maybe-uninitialized -Wno-restrict -Wno-unused-function \
+          -DBUILD_VERSION=\"$(VERSION)\" -DBUILD_TIMESTAMP=\"$(STAMP)\" -iquote src $(INCS)
+CFLAGS  = -noixemul -std=gnu99 $(OPT) $(CPU) -Wall -Wextra $(INCS)
+LDFLAGS = -noixemul $(CPU)
+BUILD   = build/amigaos
+OUT     = $(BUILD)/Daggorath
+
+GAME    = creature dod dodgame dungeon enhanced object oslink parser player \
+          sched viewer
+OBJS    = $(GAME:%=$(BUILD)/%.o) $(BUILD)/shader_amiga.o $(BUILD)/swgl.o \
+          $(BUILD)/dod_amiga.o $(BUILD)/pthread_stubs.o $(BUILD)/stack.o
+HDRS    = $(wildcard src/*.h) amiga/dod_amiga.h
+ICONS   = amiga/icons/Daggorath-drawer.info amiga/icons/Daggorath.info \
+          amiga/icons/ReadMe.info amiga/icons/Licence.info \
+          amiga/icons/conf.info amiga/icons/sound.info amiga/icons/saved.info
+
+all: $(OUT)/Daggorath
+
+$(OUT)/Daggorath: $(OBJS) $(ICONS) AMIGA_PORT.md | $(OUT)
+	$(CXX) $(LDFLAGS) -o $@ $(OBJS) $(ACSDL)/build/amigaos/libacsdl12.a -lm
+	rm -rf $(OUT)/conf $(OUT)/sound $(OUT)/saved
+	mkdir -p $(OUT)/conf $(OUT)/sound $(OUT)/saved
+	cp assets/conf/opts.ini $(OUT)/conf/
+	cp assets/sound/*.wav $(OUT)/sound/
+	cp assets/saved/game.dod $(OUT)/saved/
+	cp AMIGA_PORT.md $(OUT)/ReadMe
+	cp license/license.txt $(OUT)/Licence
+	cp amiga/icons/Daggorath.info amiga/icons/ReadMe.info \
+	   amiga/icons/Licence.info amiga/icons/conf.info \
+	   amiga/icons/sound.info amiga/icons/saved.info $(OUT)/
+	cp amiga/icons/Daggorath-drawer.info $(BUILD)/Daggorath.info
+
+$(BUILD)/%.o: src/%.cpp $(HDRS) | $(BUILD)
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
+
+$(BUILD)/shader_amiga.o: amiga/shader_amiga.cpp $(HDRS) | $(BUILD)
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
+
+$(BUILD)/dod_amiga.o: amiga/dod_amiga.c amiga/dod_amiga.h | $(BUILD)
+	$(CC) $(CFLAGS) -DDOD_NO_REMAP -c -o $@ $<
+
+$(BUILD)/pthread_stubs.o: amiga/pthread_stubs.c | $(BUILD)
+	$(CC) -noixemul $(OPT) $(CPU) -Wall -c -o $@ $<
+
+$(BUILD)/%.o: amiga/%.c amiga/dod_amiga.h | $(BUILD)
+	$(CC) $(CFLAGS) -c -o $@ $<
+
+$(BUILD) $(OUT):
+	mkdir -p $@
+
+clean:
+	rm -rf $(BUILD)
+
+.PHONY: all clean
