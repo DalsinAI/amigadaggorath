@@ -8,6 +8,16 @@ cognitivegears), for AmigaOS 3.x on a 68040 with FPU, on acsdl12, our SDL
 Upstream: https://github.com/cognitivegears/DungeonsOfDaggorath at e95bf70
 (version 0.5.0).
 
+Installing
+----------
+
+Unpack the archive anywhere (on AmiCradle: SYS:Utilities/OpenCompress x
+daggorath-...lha RAM:), then double-click Install-Daggorath beside the
+Daggorath drawer: it asks where to put the game (Work:Games by default)
+and keeps the conf and saved drawers of an earlier install. The drawer's
+Libs holds the acgame.library the game was built against, and the game
+opens that copy first.
+
 Running
 -------
 
@@ -54,7 +64,12 @@ What is different on the Amiga
 Building
 --------
 
-    make -f amiga/Makefile.amigaos STOVE=... NDK=... ACSDL=...
+    make -f amiga/Makefile.amigaos STOVE=... NDK=... ACSDL=... ACSDLLIB=... \
+         ACGAME=... ACGAMELIB=...
+
+or, for the release archive with its installer, package/build-amiga.sh
+(STOVE and OUT set; it fetches and builds acgame, acsdl12 and zlib at
+pinned commits).
 
 Output: build/amigaos/Daggorath/ (and its Daggorath.info beside it).
 amiga/include/SDL2 holds the four <SDL2/...> headers the game includes;

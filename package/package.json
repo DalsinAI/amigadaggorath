@@ -1,0 +1,41 @@
+{
+  "drawer": "Daggorath",
+  "drawer_icon": "amiga/icons/Daggorath-drawer.info",
+  "archive": "daggorath-{version}-68040",
+  "members": [
+    {
+      "name": "Daggorath",
+      "build": "Daggorath",
+      "check": "executable_sha256"
+    },
+    {
+      "name": "Libs/acgame.library",
+      "build": "acgame.library",
+      "check": "acgame_library_sha256"
+    },
+    {
+      "name": "",
+      "tar": "drawer.tar"
+    }
+  ],
+  "aminet": [
+    ["Short", "Dungeons of Daggorath (PC port), 68040+FPU"],
+    ["Author", "DynaMicro; PC port: Richard Hunerlach, cognitivegears; Amiga port: AmiCradle Team"],
+    ["Uploader", "AmiCradle Team"],
+    ["Type", "game/role"],
+    ["Version", "{version}"],
+    ["Requires", "AmigaOS 3.x, 68040/68060 with FPU, AGA or RTG, AHI"],
+    ["Architecture", "m68k-amigaos >= 3.0"]
+  ],
+  "root": [
+    {
+      "name": "Install-Daggorath",
+      "repo": "package/installer/Install-Daggorath",
+      "installer": true
+    },
+    {
+      "name": "Install-Daggorath.info",
+      "repo": "package/installer/Install-Daggorath.info"
+    }
+  ]
+}
