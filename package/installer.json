@@ -1,0 +1,16 @@
+{
+  "name": "Dungeons of Daggorath",
+  "version": "0.5.0-amiga1",
+  "drawer": "Daggorath",
+  "program": "Daggorath",
+  "cpu": "68040",
+  "fpu": true,
+  "space": 2000000,
+  "modules": [],
+  "keep": [
+    "conf",
+    "saved"
+  ],
+  "parent": "Work:Games",
+  "badge": "../amiga/icons/art/daggorath.png"
+}
