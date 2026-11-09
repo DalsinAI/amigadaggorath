@@ -83,7 +83,7 @@ the main loop, SDL 2's key repeat field, a bound on the key table) and
 src/dodgame.cpp (<cmath>).
 
 The icons are amiga/icons, made by AmiCradle's port_icons.py from
-amiga/icons/icons.json; the art is the game's own wizard (src/dod.ico).
+amiga/icons/icons.json; the art is our own (amiga/icons/art/daggorath.svg).
 
 Byte order
 ----------
