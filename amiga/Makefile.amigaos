@@ -56,7 +56,7 @@ OBJS    = $(GAME:%=$(BUILD)/%.o) $(BUILD)/shader_amiga.o $(BUILD)/swgl.o \
 HDRS    = $(wildcard src/*.h) amiga/dod_amiga.h
 ICONS   = amiga/icons/Daggorath-drawer.info amiga/icons/Daggorath.info \
           amiga/icons/ReadMe.info amiga/icons/Licence.info \
-          amiga/icons/conf.info amiga/icons/sound.info amiga/icons/saved.info
+          amiga/icons/saved.info
 
 all: $(OUT)/Daggorath
 
@@ -70,8 +70,7 @@ $(OUT)/Daggorath: $(OBJS) $(ICONS) AMIGA_PORT.md | $(OUT)
 	cp AMIGA_PORT.md $(OUT)/ReadMe
 	cp license/license.txt $(OUT)/Licence
 	cp amiga/icons/Daggorath.info amiga/icons/ReadMe.info \
-	   amiga/icons/Licence.info amiga/icons/conf.info \
-	   amiga/icons/sound.info amiga/icons/saved.info $(OUT)/
+	   amiga/icons/Licence.info amiga/icons/saved.info $(OUT)/
 	cp amiga/icons/Daggorath-drawer.info $(BUILD)/Daggorath.info
 
 $(BUILD)/%.o: src/%.cpp $(HDRS) | $(BUILD)
